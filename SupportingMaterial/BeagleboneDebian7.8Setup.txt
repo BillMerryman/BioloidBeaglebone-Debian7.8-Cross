@@ -1,0 +1,87 @@
+login:root 
+
+----------- Enable wireless
+
+edit /etc/network/interfaces by adding:
+auto {interface name}
+allow-hotplug {interface name}
+iface {interface name} inet static
+    wpa-ssid ""
+    wpa-psk  ""
+    address 192.168.2.149
+    netmask 255.255.255.0
+    network 192.168.2.0
+    gateway 192.168.2.1
+    dns-nameserver 192.168.2.1
+
+---------- Resize to fit SD card
+
+to resize the partition:
+fdisk /dev/mmcblk0
+d
+n
+p
+default
+8192
+default
+w
+resize2fs /dev/mmcblk0p1
+
+OR
+
+cd /opt/scripts/tools
+git pull
+./grow_partition.sh
+
+---------------enable remote X without SSH
+
+enable remote X without SSH by going into /etc/lightdm/lightdm.conf and edit the XDMCP settings:
+[LightDM]
+start-default-seat=false
+[SeatDefaults]
+xserver-allow-tcp=true
+autologin-user=root
+[XDMCPServer]
+enabled=true
+port=177
+key=
+
+--------------disable HDMI and eMMC
+
+disable hdmi and emmc using the uEnv.txt file (uncomment the line):
+#cape_disable=capemgr.disable_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN,BB-BONE-EMMC-2G
+
+------------install custom device tree files
+
+copy modified config-pin script to (and make executable):
+opt/source/beaglebone-universal-io
+copy cape-universalx-00A0.dtbo to:
+lib/firmware
+
+------------to fix bad DOS line returns in scripts
+
+sed -i -e 's/\r$//' scriptname.sh
+
+------------to fix problem in opencv build
+
+The problem appears to be a bug in OpenCV. I edited opencv-3.0.0/modules/videoio/src/cap_ffmpeg_impl.hpp, replacing AVCodecID with CV_CODEC_ID in all places but the #define -- in lines 1174 (optional), 1546, and 1556 -- and the build worked.
+
+------------install opencv
+
+update etc/apt/sources.list and replace ftp.us with archive
+
+apt-get update
+apt-get install build-essential cmake pkg-config
+apt-get install libtiff4-dev libjpeg-dev libjasper-dev libpng12-dev
+apt-get install libavcodec-dev libavformat-dev libswscale-dev libv4l-dev 
+copy opencv3.0.0 to desktop folder
+or
+wget -O opencv-3.0.0.zip https://github.com/Itseez/opencv/archive/3.0.0.zip
+cd opencv
+mkdir build && cd build
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_CUDA=OFF -D WITH_CUFFT=OFF -D WITH_CUBLAS=OFF -D WITH_NVCUVID=OFF -D WITH_OPENCL=OFF -D WITH_OPENCLAMDFFT=OFF -D WITH_OPENCLAMDBLAS=OFF -D BUILD_opencv_apps=OFF -D BUILD_DOCS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_TESTS=OFF -D ENABLE_NEON=on ..
+make
+make install
+ldconfig
+
+------------Now follow the directions in the 'About' file in the Debian7.8StartupSupport folder
