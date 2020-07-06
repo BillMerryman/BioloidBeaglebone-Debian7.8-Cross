@@ -52,10 +52,10 @@ COBJ = \
  main.o \
  pru.o \
  prussdrv.o \
- motionManager.o  \
- visionManager.o
+ motionManager.o 
  
- CPPOBJ =
+ CPPOBJ = \
+ 	visionManager.o
 
 # gcc binaries to use
 CC = D:\BBGCC7.8\bin\arm-linux-gnueabihf-gcc.exe
@@ -81,9 +81,6 @@ MSG_SUCCESS = ---SUCCESS---
 
 # Our favourite
 all: pru_bin $(PROJECT)
-
-#$(PROJECT):
-#	$(CP) $(CFLAGS) -o main main.c image.c  pru.c prussdrv.c
 
 # Linker call
 $(PROJECT): $(COBJ) $(CPPOBJ)
@@ -116,3 +113,4 @@ pru_bin:
 pru_clean:
 	make -C PRU_0 clean
 	make -C PRU_1 clean
+
